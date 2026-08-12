@@ -26,7 +26,7 @@
 
 6.查找
 - str.find()                找不到返回-1，不抛出异常
-- str.finde(sub,start,end)  指定搜索范围查找
+- str.find(sub,start,end)  指定搜索范围查找
 - str.index()               找不到抛出ValueError
 - str.rfind()               从右侧反向查找
 - str.rindex()              从右侧反向查找
