@@ -1,55 +1,101 @@
-'''
-1. string
-- str字符串是不可变序列，所有修改操作不会修改原来字符，而是返回新字符对象
-- 字符串支持索引，切片，遍历，内存一旦创建不能原地修改
+"""
+一.字符串底层核心认知
+1.不可变性(Immutable)
+- 保证数据安全，运行哈希值缓存，极大提升查询速度
+- 所有修改操作均返回新字符串，原字符串不改变
+"""
+strs = "hello word"
+print(f"原str-->{id(strs)}")
+print(f"strs-->{strs}")
+strs = strs.upper()
+print(f"修改后-->{id(strs)}")
+print(f"strs-->{strs}")
+"""
+原str-->2430298736112
+strs-->hello word
+修改后-->2430298748528
+strs-->HELLO WORD
+"""
 
-2.string切片
-- string[start:end:step],省略start从头开始，省略end到末尾，step步长，复数表示倒序
+"""
+2.字符串驻留(String Interning)
+- python自动缓存[a-zA-Z0-9_]的字符串，相同的内容复用同一个对象
+- 所以不要依赖is判断字符串相等，要用==
+- is判断内存对象身份，==判断内容相等
+"""
+a = "hello_word"
+b = "hello_word"
+print(f"a is b -->{a is b}")
+print(f"a-->{id(a)}")
+print(f"b-->{id(b)}")
+"""a is b -->True
+a-->2186275342512
+b-->2186275342512"""
 
-3.str内置方法（全部方法不会修改原字符串，返回新字符串）
-- str.upper()           全部大写
-- str.lower()           全部大写
-- str.swapcase()        大小写互换
-- str.capitalize()      首字母大写
-- str.title()           每个单词首字母大写
+"""
+2.1全局字符串驻留inter（全局池）
+- 条件：字符串只能是[a-zA-Z0-9_]，不能有空格，下划线，标点
+- 作用：跨函数，跨行，跨模块共享同一个对象
+- 带空格和！的字符串不会进入全局池
+>>> c = "hello word!"
+>>> d = "hello word!"
+>>> c is d        # 在交互环境下，每一行但是独立的代码
+False
+>>> id(c)
+2591187849712
+>>> id(d)
+2591187848880
+"""
 
-4.去除空白字符串
-- str.strip()               默认去除：空格\n,\t,\r
-- str.lstrip()              去除左边
-- str.rstrip()              去除右边
+"""
+2.2代码对象内部常量去重(Constantfolding,字节码编译器优化)
+- 同一个.py文件，同一个函数里面，数值量相同的两个变量属于同一个字节码对象
+- 编译的时候，python会扫描全部字面量，同一代码块内，内容完全一样的字面常量
+  直接合并成一个对象，不管有没有空格，感叹号
+"""
+c = "hello word!"
+d = "hello word!"
+print(f"c is d -->{c is d}")  # 按理说应该是False，但是编译器自动去重了
+print(f"c-->{id(c)}")
+print(f"d-->{id(d)}")
+""""
+c is d -->True
+c-->2186275342768
+d-->2186275342768"""
 
-5.对齐填充
-- str.center()              居中
-- str.ljust()               左对齐
-- str.rjust()               右对齐
-- str.zfill()               补充0
+"""
+2.3手动强制加入全局驻留池
+"""
+import sys
+str1 = 'hello word!'
+str2 = 'hello word!'
+print(str1 is str2)   # 脚本内True，在交互环境下False
+str3 = sys.intern("hello word!")
+str4 = sys.intern("hello word!")
+print(str3 is str4)    # 都为True
 
-6.查找
-- str.find()                找不到返回-1，不抛出异常
-- str.find(sub,start,end)  指定搜索范围查找
-- str.index()               找不到抛出ValueError
-- str.rfind()               从右侧反向查找
-- str.rindex()              从右侧反向查找
+"""
+二.哈希缓存
+1.哈希值hash(s)
+- 调用内置函数hash(str)，就会得到一个整数，这个整数就是字符串的哈希值
+- 作用：dict的key查找，set集合去重
+"""
+# 把任意长度的数据，通过哈希算法，算出一段固定长度的乱码字符串
+str5 = "myun"
+print(f"str5哈希值-->{hash(str5)}")     # str5哈希值-->2837929074394432124
 
-7.判断开头结尾
-- str.startwith()           以什么开头
-- str.endwith()             以什么结尾
+"""
+2.哈希缓存机制
+- str对象结构体里面有一个内部字段ob_hash，用来保存已经计算过的哈希值
+  a.字符串对象创建的时候，ob_hash = -1，表示哈希还没有计算
+  b.第一次调用hash(str),=，计算哈希值，把哈希值存入对象内部ob_hash，缓存起来
+  c.之后再调用hash(str),不需要在重新计算哈希值，直接读取计算好的on_hash
+"""
+str6 = "python"
+print(f"first-->{hash(str6)}")
+print(f"second-->{hash(str6)}")
+print(f"third-->{hash(str6)}")
+# first-->4714252391874340451
+# second-->4714252391874340451
+# third-->4714252391874340451
 
-8.分割
-- str.split(sep,maxsplit)       分割字符串，maxsplit设置最大分割数
-- str.rsplit(sep,maxsplit)      反向分割字符串，maxsplit设置最大分割数
-- partition(sep)                永远返回三元组(head,sep,tail)，找不到分隔符sep为空，不会报错
-- rpartition(sep)               
-
-9.拼接
-- str.join(可到达对象)          把元组，列表里面的字符拼接
-
-10.替换
-- str.replace('old_str','new_str','index')    index表示只替换第index处
-
-11.字符串判断方法（返回布尔值）
-- str.isdigit()             是否全部是数字
-- str.isalpha()             是否全部是字母
-- str.isalnum()             是否是字母或数字
-- str.isspace()             是否全部是空白字符
-'''
