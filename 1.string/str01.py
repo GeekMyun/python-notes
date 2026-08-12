@@ -37,7 +37,7 @@
 
 8.分割
 - str.split(sep,maxsplit)       分割字符串，maxsplit设置最大分割数
-- srr.rsplit(sep,maxsplit)      反向分割字符串，maxsplit设置最大分割数
+- str.rsplit(sep,maxsplit)      反向分割字符串，maxsplit设置最大分割数
 - partition(sep)                永远返回三元组(head,sep,tail)，找不到分隔符sep为空，不会报错
 - rpartition(sep)               
 
